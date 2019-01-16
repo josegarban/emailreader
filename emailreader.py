@@ -44,6 +44,7 @@ def readmail(credentials):
     try:
         mail = imaplib.IMAP4_SSL(SMTPSERVER)
         mail.login(EMAIL, PASSWORD)
+        print("Intentando acceder al correo...")
     except:
         print("Posible error de autenticación.")
         print("""
@@ -59,8 +60,9 @@ y en la configuración busque «permitir aplicaciones menos seguras».
 https://myaccount.google.com/security.
 La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pasos».
             """)
-        return None
+        return
     
+    print("Se logró acceder al buzón de correo electrónico.")
     print("¿Desde cuál mensaje desea leer, contando desde el más reciente?")
     diff = input("Inserte un número: ")
     print("Se leerán los últimos", diff, "mensajes")
@@ -117,7 +119,13 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)
                 except:
                     pass
-                    
+
+                try:
+                    datetime_patt = "%a, %d %b %Y %H:%M:%S %z %Z"
+                    datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)
+                except:
+                    pass
+
                 # Extract year, month, day from datetime stamp on emails
                 try:
                     datetime_conv = datetime_conv.replace(tzinfo=timezone.utc).astimezone(tz=None)
