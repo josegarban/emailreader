@@ -4,6 +4,7 @@ import imaplib
 import getpass
 from datetime import datetime
 from datetime import timezone
+import dateutil
 import email
 
 """
@@ -42,9 +43,9 @@ def readmail(credentials):
     SMTPSERVER = credentials["smtpserver"]
     
     try:
+        print("Intentando acceder al correo...")
         mail = imaplib.IMAP4_SSL(SMTPSERVER)
         mail.login(EMAIL, PASSWORD)
-        print("Intentando acceder al correo...")
     except:
         print("Posible error de autenticación.")
         print("""
@@ -60,9 +61,9 @@ y en la configuración busque «permitir aplicaciones menos seguras».
 https://myaccount.google.com/security.
 La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pasos».
             """)
-        return
+        return None
     
-    print("Se logró acceder al buzón de correo electrónico.")
+    print("Se logró acceder al buzón de correo electrónico.\n")
     print("¿Desde cuál mensaje desea leer, contando desde el más reciente?")
     diff = input("Inserte un número: ")
     print("Se leerán los últimos", diff, "mensajes")
@@ -79,6 +80,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     # Lists where the messages with errors in processing will be enumerated
     unprocesseddates = []
     unprocessedbodies = []
+    unopened = []  
     
     interval = range(latest, earliest, -1)
     print("Se procesarán los mensajes entre el", latest, "y el", earliest + 1)
@@ -90,103 +92,120 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
         
         for item in data:                        
             if isinstance(item, tuple):
-                message = email.message_from_string(item[1].decode())
-#                print(message) 
-                messagedict                 = {}
-                messagedict["id"]           = i
-                messagedict["from"]         = message["from"]
-                messagedict["subject"]      = message["subject"]
-                messagedict["delivered-to"] = message ["delivered-to"]
-                messagedict["message-id"]   = message["message-id"]
+                try:
+                    message = email.message_from_string(item[1].decode())
+    #                print(message) 
+                    messagedict                 = {}
+                    messagedict["id"]           = i
+                    messagedict["from"]         = message["from"]
+                    messagedict["subject"]      = message["subject"]
+                    messagedict["delivered-to"] = message ["delivered-to"]
+                    messagedict["message-id"]   = message["message-id"]
 
-                messagedict["date"]         = message["date"]
+                    messagedict["date"]         = message["date"]
+                        
+                    # Convert string to datetime in some commonly found datetime patterns                
+                    try:
+                        datetime_patt = "%a, %d %b %Y %H:%M:%S %z"
+                        datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)            
+                    except:
+                        pass
                     
-                # Convert string to datetime in some commonly found datetime patterns                
-                try:
-                    datetime_patt = "%a, %d %b %Y %H:%M:%S %z"
-                    datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)            
-                except:
-                    pass
-                
-                try:
-                    datetime_patt = "%a %b %d %H:%M:%S %Z %Y"
-                    datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)
-                except:
-                    pass
-                
-                try:
-                    datetime_patt = "%a, %d %b %Y %H:%M:%S %z (%Z)"
-                    datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)
-                except:
-                    pass
-
-                try:
-                    datetime_patt = "%a, %d %b %Y %H:%M:%S %z %Z"
-                    datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)
-                except:
-                    pass
-
-                # Extract year, month, day from datetime stamp on emails
-                try:
-                    datetime_conv = datetime_conv.replace(tzinfo=timezone.utc).astimezone(tz=None)
-#                    print(message["date"], "→", datetime_conv) # Test the datetime conversion
-                    messagedict["year"] = (datetime_conv.year)
-                    messagedict["month"] = (datetime_conv.month)
-                    messagedict["day"] = (datetime_conv.day)
-                    messagedict["datetime"] = '{:%Y-%m-%d %H:%M}'.format(datetime(
-                        datetime_conv.year,
-                        datetime_conv.month,
-                        datetime_conv.day,
-                        datetime_conv.hour,
-                        datetime_conv.minute))                
-#                    print(messagedict["year"], messagedict["month"],
-#                            messagedict["day"], messagedict["datetime"])                    
-                except:
-                    # Print an error message and send the e-mail to the second dictionary
-                    print("No se pudo procesar la fecha en el mensaje", i)
-                    print("Fecha:", messagedict["date"])
-                    unprocesseddates.append((i, messagedict["date"]))
-                    messagedict["year"]     = "Year not read"      # Fields that were not parsed
-                    messagedict["month"]    = "Month not read"     # are not left blank
-                    messagedict["day"]      = "Day not read"       # so that the csv will have
-                    messagedict["datetime"] = "Datetime not read"  # all fields in the same place
+                    try:
+                        datetime_patt = "%a %b %d %H:%M:%S %Z %Y"
+                        datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)
+                    except:
+                        pass
                     
-                # Get the message body
-                try:                                
-                    if message.is_multipart():
-                        messagedict["body"]     = ""
-                        for payload in message.get_payload():
-                            messagedict["body"] = messagedict["body"] + str(payload.get_payload())
-                    else:
-                        messagedict["body"]     = str(message.get_payload())
-                
-                    outputdict[messagedict["id"]] = messagedict
-                except:
-                    # Print an error message and send the e-mail to the third dictionary
-                    print("No se pudo procesar el cuerpo del mensaje", i)
-                    messagedict["body"] = "Body not read"
-                    unprocessedbodies.append(i)                        
+                    try:
+                        datetime_patt = "%a, %d %b %Y %H:%M:%S %z (%Z)"
+                        datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)
+                    except:
+                        pass
 
+                    try:
+                        datetime_conv = dateutil.parser.parse(str(message["date"]))
+                    except:
+                        pass
+
+                    # Extract year, month, day from datetime stamp on emails
+                    try:
+    #                    print(message["date"])
+    #                    print(datetime_conv)
+                        # Convert datestamps to your local timezone
+                        datetime_conv = datetime_conv.replace(tzinfo=timezone.utc).astimezone(tz=None)
+    #                    print(datetime_conv)
+    #                    print(message["date"], "→", datetime_conv) # Test the datetime conversion
+                        messagedict["year"] = (datetime_conv.year)
+                        messagedict["month"] = (datetime_conv.month)
+                        messagedict["day"] = (datetime_conv.day)
+                        messagedict["datetime"] = '{:%Y-%m-%d %H:%M}'.format(datetime(
+                            datetime_conv.year,
+                            datetime_conv.month,
+                            datetime_conv.day,
+                            datetime_conv.hour,
+                            datetime_conv.minute))                
+    #                    print(messagedict["year"], messagedict["month"],
+    #                            messagedict["day"], messagedict["datetime"])                    
+                    except:
+                        # Print an error message and send the e-mail to the second dictionary
+                        print("No se pudo procesar la fecha en el mensaje", i)
+                        print("Fecha:", messagedict["date"])
+                        unprocesseddates.append((i, messagedict["date"]))
+                        messagedict["year"]     = "Year not read"      # Fields that were not parsed
+                        messagedict["month"]    = "Month not read"     # are not left blank
+                        messagedict["day"]      = "Day not read"       # so that the csv will have
+                        messagedict["datetime"] = "Datetime not read"  # all fields in the same place
+                        
+                    # Get the message body
+                    try:                                
+                        if message.is_multipart():
+                            messagedict["body"]     = ""
+                            for payload in message.get_payload():
+                                messagedict["body"] = messagedict["body"] + str(payload.get_payload())
+                        else:
+                            messagedict["body"]     = str(message.get_payload())
+                    
+                        outputdict[messagedict["id"]] = messagedict
+                    except:
+                        # Print an error message and send the e-mail to the third dictionary
+                        print("No se pudo procesar el cuerpo del mensaje", i)
+                        messagedict["body"] = "Body not read"
+                        unprocessedbodies.append(i)
+                except:
+                    print("No se pudo abrir el mensaje", i)
+                    unopened.append(i)
+                    
     # Report to the user the result of their request
     print("Total de mensajes procesados:", len(outputdict), "(",
           round(100 * len(outputdict)/(latest - earliest) , 1)
           , "% )")
+    print("")
 
     if len(unprocesseddates) == 0:
-        print("\nMensajes con fechas no procesadas:", len(unprocesseddates))
+        print("Mensajes con fechas no procesadas:", len(unprocesseddates))
     else:
-        print("\nMensajes con fechas no procesadas:", len(unprocesseddates))
+        print("Mensajes con fechas no procesadas:", len(unprocesseddates))
         pprint.pprint(unprocesseddates)
+    print("")
 
     if len(unprocessedbodies) == 0:
-        print("\nMensajes con cuerpos no procesados:", len(unprocessedbodies))
+        print("Mensajes con cuerpos no procesados:", len(unprocessedbodies))
     else:
-        print("\nMensajes con cuerpos no procesados:")
+        print("Mensajes con cuerpos no procesados:")
         print(unprocessedbodies)
+    print("")
 
-    print(unprocesseddates, unprocessedbodies)
+    if len(unopened) == 0:
+        print("Mensajes no abiertos:", len(unopened))
+    else:
+        print("Mensajes no abiertos:")
+        print(unopened)
+    print("")
 
-    return (outputdict, unprocesseddates, unprocessedbodies)
+#    print(unprocesseddates, unprocessedbodies)
+
+    return (outputdict, unprocesseddates, unprocessedbodies, unopened)
 
 #test = readmail(getcredentials())
 
@@ -256,9 +275,13 @@ def save_mails_to_csvfiles ():
     unprocessedbodies = mails[2]    
     ubodies_fn        = "unprocessedbodies.csv"
 
+    unopened          = mails[3]    
+    unopened_fn       = "unopened.csv"
+
     tups = [(processedmails,  procmails_fn),
             (unprocesseddates,   udates_fn),
-            (unprocessedbodies, ubodies_fn)
+            (unprocessedbodies, ubodies_fn),
+            (unopened,         unopened_fn)
             ]
     
     # Write files depending on whether we have a dictionary or a list
