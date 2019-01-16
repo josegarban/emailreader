@@ -79,7 +79,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     unprocessedbodies = []
     
     interval = range(latest, earliest, -1)
-    print("Se procesarán los mensajes entre el", latest, "y el", earliest)
+    print("Se procesarán los mensajes entre el", latest, "y el", earliest + 1)
     
     for i in interval:
         typ, data = mail.fetch(str(i), '(RFC822)' )
@@ -125,13 +125,23 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     messagedict["year"] = (datetime_conv.year)
                     messagedict["month"] = (datetime_conv.month)
                     messagedict["day"] = (datetime_conv.day)
-                    messagedict["time"] = (str(datetime_conv.hour) +":"+ str(datetime_conv.minute))                
-#                    print(messagedict["year"], messagedict["month"], messagedict["day"], messagedict["time"])                    
+                    messagedict["datetime"] = '{:%Y-%m-%d %H:%M}'.format(datetime(
+                        datetime_conv.year,
+                        datetime_conv.month,
+                        datetime_conv.day,
+                        datetime_conv.hour,
+                        datetime_conv.minute))                
+#                    print(messagedict["year"], messagedict["month"],
+#                            messagedict["day"], messagedict["datetime"])                    
                 except:
                     # Print an error message and send the e-mail to the second dictionary
                     print("No se pudo procesar la fecha en el mensaje", i)
                     print("Fecha:", messagedict["date"])
                     unprocesseddates.append((i, messagedict["date"]))
+                    messagedict["year"]     = "Year not read"      # Fields that were not parsed
+                    messagedict["month"]    = "Month not read"     # are not left blank
+                    messagedict["day"]      = "Day not read"       # so that the csv will have
+                    messagedict["datetime"] = "Datetime not read"  # all fields in the same place
                     
                 # Get the message body
                 try:                                
@@ -146,6 +156,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                 except:
                     # Print an error message and send the e-mail to the third dictionary
                     print("No se pudo procesar el cuerpo del mensaje", i)
+                    messagedict["body"] = "Body not read"
                     unprocessedbodies.append(i)                        
 
     # Report to the user the result of their request
@@ -252,8 +263,7 @@ def save_mails_to_csvfiles ():
             print("Se guardó el archivo", tup[1])
         else:
             print("Error procesando el diccionario o lista.")
-    
-    
+        
 test = save_mails_to_csvfiles ()
 
 #pprint.pprint (readmail(MYCREDENTIALS))
