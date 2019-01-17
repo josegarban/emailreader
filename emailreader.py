@@ -88,7 +88,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     unopened = []  
     
     interval = range(latest, earliest, -1)
-    print("Se procesarán los mensajes entre el", latest, "y el", earliest + 1)
+    print("Se procesarán los mensajes entre el", latest-1, "y el", earliest)
     
     for i in interval:
         typ, data = mail.fetch(str(i), '(RFC822)' )
@@ -174,9 +174,9 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                             messagedict["body"]     = ""
                             for payload in message.get_payload():
                                 fragment = payload.get_payload()
-                                messagedict["body"] = messagedict["body"] + fragment
+                                messagedict["body"] = messagedict["body"] + str(fragment)
                         else:
-                            messagedict["body"] = message
+                            messagedict["body"] = str(message)
                     
                         outputdict[messagedict["id"]] = messagedict
                     except:
