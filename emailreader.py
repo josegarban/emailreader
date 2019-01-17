@@ -66,15 +66,19 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     
     print("Se logró acceder al buzón de correo electrónico.\n")
     print("¿Desde cuál mensaje desea leer, contando desde el más reciente?")
-    diff = input("Inserte un número: ")
-    print("Se leerán los últimos", diff, "mensajes")
+    ref = input("Inserte un número o deje en blanco para leer a partir del mensaje más reciente. ")
+    if ref == "": ref = -1 # Start from latest message
+    print("¿Cuántos mensajes desea leer?")
+    diff = input("Inserte un número: ")    
+    if ref == -1: print("Se leerán los últimos", int(diff), "mensajes")
+    else: print("Se leerán", int(diff), "mensajes a partir del", str(ref)+".")
     
     mail.select("inbox")    
     typ, data = mail.search(None, "ALL")
     
     id_list  = data[0].split()        
-    earliest = int(id_list[-int(diff)-1]) 
-    latest   = int(id_list[-1]) 
+    earliest = int(id_list[int(ref)-int(diff)]) 
+    latest   = int(id_list[int(ref)]) 
     
     outputdict = {}
     
@@ -350,7 +354,9 @@ def save_mails_to_csvfiles ():
     
     # Write files depending on whether we have a dictionary or a list
     for tup in tups:
-        if len(tup[0]) == 0:
+        if tup[0] is None:
+            print("No se guardó un archivo. Posible error.")
+        elif len(tup[0]) == 0:
             empty_to_csv (tup[0], tup[1])
             print("Se guardó el archivo", tup[1])
         elif isinstance (tup[0], int) or isinstance (tup[0], str):
