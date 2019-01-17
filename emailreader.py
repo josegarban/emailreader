@@ -209,6 +209,10 @@ def dictlist_to_csv (input_list, output_filename):
                              quotechar = '"',
                              quoting = csv.QUOTE_MINIMAL)
         
+        firstentry = input_dict[list(input_dict.keys())[1]]
+        print ("Campos:", firstentry.keys())
+        writer.writerow(firstentry.keys())
+                
         for row in input_list:
             writer.writerow(row)
     
@@ -228,6 +232,10 @@ def nesteddict_to_csv (input_dict, output_filename):
                              delimiter = ";",
                              quotechar = '"',
                              quoting = csv.QUOTE_MINIMAL)
+        
+        firstentry = input_dict[list(input_dict.keys())[1]]
+        print ("Campos:", firstentry.keys())
+        writer.writerow(firstentry.keys())
         
         for key in input_dict.keys():
             templist = []
