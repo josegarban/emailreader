@@ -108,39 +108,10 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     messagedict["message-id"]   = message["message-id"]
 
                     messagedict["date"]         = message["date"]
-                        
-                    # Convert string to datetime in some commonly found datetime patterns                
-                    try:
-                        datetime_patt = "%a, %d %b %Y %H:%M:%S %z"
-                        datetime_conv = datetime.strptime(message["date"], datetime_patt)            
-                    except:
-                        pass
-                    
-                    try:
-                        datetime_patt = "%a %b %d %H:%M:%S %Z %Y"
-                        datetime_conv = datetime.strptime(message["date"], datetime_patt)
-                    except:
-                        pass
-                    
-                    try:
-                        datetime_patt = "%a, %d %b %Y %H:%M:%S %z (%Z)"
-                        datetime_conv = datetime.strptime(message["date"], datetime_patt)
-                    except:
-                        pass
-                    
-                    try:
-                        datetime_patt = "%a, %d %b %Y %H:%M:%S %z %Z"
-                        datetime_conv = datetime.strptime(message["date"], datetime_patt)
-                    except:
-                        pass
-
-                    try:
-                        datetime_conv = dateutil.parser.parse(str(message["date"]))
-                    except:
-                        pass
 
                     # Extract year, month, day from datetime stamp on emails
                     try:
+                        datetime_conv = dateutil.parser.parse(str(message["date"]))
     #                    print(message["date"])
     #                    print(datetime_conv)
                         # Convert datestamps to your local timezone
