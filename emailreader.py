@@ -231,7 +231,7 @@ def dictlist_to_csv (input_list, output_filename):
         (2) output csv filename
     """
     # Open (or create) csv file
-    with open (output_filename, "w") as csvfile:
+    with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
                              delimiter = ";",
                              quotechar = '"',
@@ -250,7 +250,7 @@ def nesteddict_to_csv (input_dict, output_filename):
         (2) output csv filename
     """
     # Open (or create) csv file
-    with open (output_filename, "w") as csvfile:
+    with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
                              delimiter = ";",
                              quotechar = '"',
@@ -260,8 +260,12 @@ def nesteddict_to_csv (input_dict, output_filename):
             templist = []
             for field in input_dict[key]:
                 templist.append((input_dict[key])[field])
-            writer.writerow(templist)
-    
+            try:
+                writer.writerow(templist)
+            except:
+                print("Corrección de codificación.")
+                writer.writerow(templist.encode("utf8"))
+
     return None
 
 def empty_to_csv (input_iterable, output_filename):
@@ -272,7 +276,7 @@ def empty_to_csv (input_iterable, output_filename):
         (2) output csv filename
     """
     # Open (or create) csv file
-    with open (output_filename, "w") as csvfile:
+    with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
                              delimiter = ";",
                              quotechar = '"',
@@ -290,7 +294,7 @@ def single_to_csv (input_single, output_filename):
         (2) output csv filename
     """
     # Open (or create) csv file
-    with open (output_filename, "w") as csvfile:
+    with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
                              delimiter = ";",
                              quotechar = '"',
@@ -308,7 +312,7 @@ def list_to_csv (input_list, output_filename):
         (2) output csv filename
     """
     # Open (or create) csv file
-    with open (output_filename, "w") as csvfile:
+    with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
                              delimiter = ";",
                              quotechar = '"',
