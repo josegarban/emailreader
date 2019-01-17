@@ -5,6 +5,7 @@ import getpass
 from datetime import datetime
 from datetime import timezone
 import dateutil
+from dateutil import parser
 import email
 
 """
@@ -107,19 +108,25 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     # Convert string to datetime in some commonly found datetime patterns                
                     try:
                         datetime_patt = "%a, %d %b %Y %H:%M:%S %z"
-                        datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)            
+                        datetime_conv = datetime.strptime(message["date"], datetime_patt)            
                     except:
                         pass
                     
                     try:
                         datetime_patt = "%a %b %d %H:%M:%S %Z %Y"
-                        datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)
+                        datetime_conv = datetime.strptime(message["date"], datetime_patt)
                     except:
                         pass
                     
                     try:
                         datetime_patt = "%a, %d %b %Y %H:%M:%S %z (%Z)"
-                        datetime_conv = datetime.strptime(messagedict["date"], datetime_patt)
+                        datetime_conv = datetime.strptime(message["date"], datetime_patt)
+                    except:
+                        pass
+                    
+                    try:
+                        datetime_patt = "%a, %d %b %Y %H:%M:%S %z %Z"
+                        datetime_conv = datetime.strptime(message["date"], datetime_patt)
                     except:
                         pass
 
@@ -162,9 +169,10 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                         if message.is_multipart():
                             messagedict["body"]     = ""
                             for payload in message.get_payload():
-                                messagedict["body"] = messagedict["body"] + str(payload.get_payload())
+                                fragment = payload.get_payload()
+                                messagedict["body"] = messagedict["body"] + fragment
                         else:
-                            messagedict["body"]     = str(message.get_payload())
+                            messagedict["body"] = message
                     
                         outputdict[messagedict["id"]] = messagedict
                     except:
@@ -252,6 +260,62 @@ def nesteddict_to_csv (input_dict, output_filename):
     
     return None
 
+def empty_to_csv (input_iterable, output_filename):
+    """
+    Objective: open an empty dictionary or list write it to a csv file
+    Inputs:
+        (1) empty dictionary or list
+        (2) output csv filename
+    """
+    # Open (or create) csv file
+    with open (output_filename, "w") as csvfile:
+        writer = csv.writer (csvfile,
+                             delimiter = ";",
+                             quotechar = '"',
+                             quoting = csv.QUOTE_MINIMAL)
+        
+        writer.writerow(["No elements to display."])
+    
+    return None
+
+def single_to_csv (input_single, output_filename):
+    """
+    Objective: write a single item to a csv file
+    Inputs:
+        (1) single item
+        (2) output csv filename
+    """
+    # Open (or create) csv file
+    with open (output_filename, "w") as csvfile:
+        writer = csv.writer (csvfile,
+                             delimiter = ";",
+                             quotechar = '"',
+                             quoting = csv.QUOTE_MINIMAL)
+        
+        writer.writerow([input_single])
+    
+    return None
+
+def list_to_csv (input_list, output_filename):
+    """
+    Objective: open a list and write it to a csv file
+    Inputs:
+        (1) empty dictionary or list
+        (2) output csv filename
+    """
+    # Open (or create) csv file
+    with open (output_filename, "w") as csvfile:
+        writer = csv.writer (csvfile,
+                             delimiter = ";",
+                             quotechar = '"',
+                             quoting = csv.QUOTE_MINIMAL)
+        
+        for item in input_list:
+            writer.writerow([item])
+    
+    return None
+
+
 ####################################################################################################
 
 def save_mails_to_csvfiles ():
@@ -286,11 +350,20 @@ def save_mails_to_csvfiles ():
     
     # Write files depending on whether we have a dictionary or a list
     for tup in tups:
-        if   isinstance (tup[0], dict):
+        if len(tup[0]) == 0:
+            empty_to_csv (tup[0], tup[1])
+            print("Se guardó el archivo", tup[1])
+        elif isinstance (tup[0], int) or isinstance (tup[0], str):
+            single_to_csv (tup[0], tup[1])
+            print("Se guardó el archivo", tup[1])
+        elif isinstance (tup[0], dict):
             nesteddict_to_csv (tup[0], tup[1])
             print("Se guardó el archivo", tup[1])
+        elif isinstance (tup[0], list) and isinstance(tup[0][0], dict):
+            dictlist_to_csv (tup[0], tup[1])
+            print("Se guardó el archivo", tup[1])
         elif isinstance (tup[0], list):
-            dictlist_to_csv   (tup[0], tup[1])
+            list_to_csv (tup[0], tup[1])
             print("Se guardó el archivo", tup[1])
         else:
             print("Error procesando el diccionario o lista.")
