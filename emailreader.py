@@ -201,6 +201,7 @@ def dictlist_to_csv (input_list, output_filename):
         (1) list containing dictionaries
         (2) output csv filename
     """
+    print("Creando archivo", output_filename+"...")
     # Open (or create) csv file
     with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
@@ -220,6 +221,7 @@ def nesteddict_to_csv (input_dict, output_filename):
         (1) dictionary containing dictionaries
         (2) output csv filename
     """
+    print("Creando archivo", output_filename+"...")
     # Open (or create) csv file
     with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
@@ -246,6 +248,7 @@ def empty_to_csv (input_iterable, output_filename):
         (1) empty dictionary or list
         (2) output csv filename
     """
+    print("Creando archivo", output_filename+"...")
     # Open (or create) csv file
     with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
@@ -264,6 +267,7 @@ def single_to_csv (input_single, output_filename):
         (1) single item
         (2) output csv filename
     """
+    print("Creando archivo", output_filename+"...")
     # Open (or create) csv file
     with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
@@ -282,6 +286,7 @@ def list_to_csv (input_list, output_filename):
         (1) empty dictionary or list
         (2) output csv filename
     """
+    print("Creando archivo", output_filename+"...")
     # Open (or create) csv file
     with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
