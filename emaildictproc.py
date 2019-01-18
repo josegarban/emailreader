@@ -28,7 +28,7 @@ def nesteddict_to_csv (input_dict, output_filename):
                              quotechar = '"',
                              quoting = csv.QUOTE_MINIMAL)
         
-        firstentry = input_dict[list(input_dict.keys())[1]]
+        firstentry = input_dict[list(input_dict.keys())[0]]
         print ("Campos:", firstentry.keys())
         writer.writerow(firstentry.keys())
         
@@ -41,6 +41,26 @@ def nesteddict_to_csv (input_dict, output_filename):
             except:
                 print("Corrección de codificación.")
                 writer.writerow(templist.encode("utf8"))
+
+    return None
+
+def nestedlist_to_csv (input_list, output_filename):
+    """
+    Objective: open a list containing lists and write it to a csv file
+    Inputs:
+        (1) list containing lists
+        (2) output csv filename
+    """
+    print("\nCreando archivo", output_filename+"...")
+    # Open (or create) csv file
+    with open (output_filename, "w", encoding="utf8") as csvfile:
+        writer = csv.writer (csvfile,
+                             delimiter = ";",
+                             quotechar = '"',
+                             quoting = csv.QUOTE_MINIMAL)
+                
+        for row in input_list:
+            writer.writerow(row)
 
     return None
 
@@ -119,7 +139,7 @@ def find_emails_in_body (input_dict):
         A dictionary where the key is the id in input_dict mapped to a set of e-mails.
         The dictionary is also exported as a csv file.
     """
-    print("\nLos correos se analizarán a continuación.\n")
+    print("\nLos correos se analizarán a continuación para encontrar los textos deseados.")
     searchfield = "body"    
     copiedfields = ("id", "from", "subject", "delivered-to", "year", "month", "day", "datetime")
     output_dict = {}
@@ -147,11 +167,47 @@ def find_emails_in_body (input_dict):
         # The inner dictionary is appended to the outer dictionary
         output_dict[record_dict["id"]] = record_dict
 
-        # Export findings to a csv file
-        nesteddict_to_csv (output_dict, "emails_permessage.csv")
+    # Export findings to a csv file
+    nesteddict_to_csv (output_dict, "emails_permessage.csv")
         
     return output_dict
 
 # Test:
 test2 = find_emails_in_body(test)
 #pprint.pprint(test2)
+
+def consolidate_emails (input_dict):
+    """
+    Input: the dictionary resulting from find_emails_in_body
+    Output: a list containing unique e-mail addresses and the sources where they were found.
+    The list is also exported as a csv file.
+    """
+    print("\nConsolidando correos electrónicos...")
+    output_list = []
+    field_to_match = "from"    # Field to be used as key in the output lsit
+    
+    # Consolidate all e-mails found in bodies of all messages in a single set
+    field_to_consolidate = "emails-in-body"
+    all_found_results_set = set()    
+    for key in input_dict:
+        for field_value in input_dict[key][field_to_consolidate]:
+            all_found_results_set.add(field_value)
+    
+    # Add headers to output list
+    output_list.append([field_to_consolidate, field_to_match])
+    
+    # Record where those e-mails came from
+    for result in all_found_results_set:
+        for source_record in input_dict:
+            
+            field_to_match_value = input_dict[source_record][field_to_match]
+            output_list.append([result, field_to_match_value])
+    
+    nestedlist_to_csv(output_list, "matched_emails.csv")
+    
+    return output_list
+    
+# Test:
+test3 = consolidate_emails(test2)
+pprint.pprint(test3)
+    
