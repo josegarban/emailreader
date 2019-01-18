@@ -199,10 +199,12 @@ def consolidate_emails (input_dict):
     # Record where those e-mails came from
     for result in all_found_results_set:
         for source_record in input_dict:
-            
             field_to_match_value = input_dict[source_record][field_to_match]
-            field_to_match_value = field_to_match_value
-            output_list.append([result, field_to_match_value])
+
+            if result in input_dict[source_record][field_to_consolidate]:
+                # Prevent adding a match more than once
+                if [result, field_to_match_value] not in output_list: 
+                    output_list.append([result, field_to_match_value])
     
     nestedlist_to_csv(output_list, "matched_emails.csv")
     
