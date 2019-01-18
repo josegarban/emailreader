@@ -201,6 +201,7 @@ def consolidate_emails (input_dict):
         for source_record in input_dict:
             
             field_to_match_value = input_dict[source_record][field_to_match]
+            field_to_match_value = field_to_match_value
             output_list.append([result, field_to_match_value])
     
     nestedlist_to_csv(output_list, "matched_emails.csv")

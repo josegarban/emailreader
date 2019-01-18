@@ -7,6 +7,7 @@ from datetime import timezone
 import dateutil
 from dateutil import parser
 import email
+from email.header import decode_header
 
 """
 La contraseña no es la contraseña normal.
@@ -98,12 +99,25 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
         for item in data:                        
             if isinstance(item, tuple):
                 try:
-                    message = email.message_from_string(item[1].decode())
+                    message = email.message_from_string(item[1].decode("utf-8", "ignore"))
     #                print(message) 
                     messagedict                 = {}
                     messagedict["id"]           = i
-                    messagedict["from"]         = message["from"]
-                    messagedict["subject"]      = message["subject"]
+
+                    # Get "from" field in e-mail
+                    try: # To prevent occasional encoding errors
+                        temp                    = decode_header(message["from"])
+                        messagedict["from"]     = str(temp[0][0])[2:-1] + str(temp[1][0])[2:-1]
+                    except: # Most messages won't need a complicated treatment
+                        messagedict["from"]     = str(message["from"])    
+                    
+                    # Get "subject" field in e-mail
+                    try: # To prevent occasional encoding errors
+                        temp                    = decode_header(message["subject"])
+                        messagedict["subject"]     = str(temp[0][0])[2:-1] + str(temp[1][0])[2:-1]
+                    except: # Most messages won't need a complicated treatment
+                        messagedict["subject"]     = str(message["subject"])   
+                    
                     messagedict["delivered-to"] = message ["delivered-to"]
                     messagedict["message-id"]   = message["message-id"]
 
