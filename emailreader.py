@@ -114,8 +114,20 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     # Get "subject" field in e-mail
                     try: # To prevent occasional encoding errors
                         temp                    = decode_header(message["subject"])
-                        messagedict["subject"]     = str(temp[0][0])[2:-1] + str(temp[1][0])[2:-1]
-                    except: # Most messages won't need a complicated treatment
+                        print("try", temp)
+                        if temp[0][1] == "utf-8":
+                            temp = str(temp[0][0]).encode().decode('unicode-escape')
+                            print("try", temp)
+                            temp = temp.replace("\r", " ")
+                            temp = temp.replace("\n", " ")
+                            messagedict["subject"]  = str(temp)[2:-1]
+                            print("try", temp)
+                        elif temp[0][1] == "None":
+                            messagedict["subject"]  = str(temp[0][0])
+                        else:
+                            messagedict["subject"]  = str(message["subject"])   
+                        print ("End", messagedict["subject"])
+                    except: 
                         messagedict["subject"]     = str(message["subject"])   
                     
                     messagedict["delivered-to"] = message ["delivered-to"]

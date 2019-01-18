@@ -74,7 +74,7 @@ def read_csv_fieldnames(input_filename):
     """
     print("Leyendo nombres de campos...")    
     # Open file and read text in file
-    with open(input_filename, "r") as csvfile:
+    with open(input_filename, "r", encoding="utf8") as csvfile:
         reader = csv.DictReader(csvfile,
                                delimiter = ";",
                                quotechar = '"')
@@ -102,7 +102,7 @@ def csv_to_nesteddict(input_filename, keyfield):
     templist = []
     
     # Open file and read text
-    with open(input_filename, "r") as csvfile:
+    with open(input_filename, "r", encoding="utf8") as csvfile:
         reader = csv.reader(csvfile,
                             delimiter = ";",
                             quotechar = '"')        
