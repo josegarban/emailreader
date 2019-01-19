@@ -92,7 +92,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     print("Se procesarán los mensajes entre el", latest-1, "y el", earliest)
     
     for i in interval:
-        typ, data = mail.fetch(str(i), '(RFC822)' )
+        typ, data = mail.fetch(str(i), "(RFC822)" )
         # The following line will let the user know the progress of their request
         print("Leyendo mensaje", latest - i + 1, "de", latest - earliest)
         
@@ -113,22 +113,23 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     
                     # Get "subject" field in e-mail
                     try: # To prevent occasional encoding errors
-                        temp                    = decode_header(message["subject"])
-                        print("try", temp)
-                        if temp[0][1] == "utf-8":
-                            temp = str(temp[0][0]).encode().decode('unicode-escape')
-                            print("try", temp)
-                            temp = temp.replace("\r", " ")
-                            temp = temp.replace("\n", " ")
-                            messagedict["subject"]  = str(temp)[2:-1]
-                            print("try", temp)
-                        elif temp[0][1] == "None":
-                            messagedict["subject"]  = str(temp[0][0])
-                        else:
-                            messagedict["subject"]  = str(message["subject"])   
+                        temp = decode_header(message["subject"])
+                        messagedict["subject"] = ""
+                        print("try", len(temp), temp)
+                        for tup in temp: # Some subjects may contain several tuples
+                            
+                            if tup[1] == "utf-8": # There may be different encodings
+                                piece = str(tup[0]).encode().decode('unicode-escape')
+                            elif tup[1] == "None" or tup[1] is None:
+                                piece = str(tup[0])
+                                
+                            print(piece)
+                            piece = piece.replace("b'", "").replace("\n","").replace("\r","")
+                            messagedict["subject"] = messagedict["subject"] + piece    
+                        
                         print ("End", messagedict["subject"])
                     except: 
-                        messagedict["subject"]     = str(message["subject"])   
+                        messagedict["subject"] = str(message["subject"])   
                     
                     messagedict["delivered-to"] = message ["delivered-to"]
                     messagedict["message-id"]   = message["message-id"]
