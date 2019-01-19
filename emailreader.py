@@ -115,19 +115,19 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     try: # To prevent occasional encoding errors
                         temp = decode_header(message["subject"])
                         messagedict["subject"] = ""
-                        print("try", len(temp), temp)
+#                        print("try", len(temp), temp)
                         for tup in temp: # Some subjects may contain several tuples
                             
                             if tup[1] == "utf-8": # There may be different encodings
-                                piece = str(tup[0]).encode().decode('unicode-escape')
+                                piece = str(tup[0]).encode().decode('unicode-escape').encode('latin-1').decode('utf-8')
                             elif tup[1] == "None" or tup[1] is None:
                                 piece = str(tup[0])
                                 
-                            print(piece)
-                            piece = piece.replace("b'", "").replace("\n","").replace("\r","")
+#                            print(piece)
+                            piece = piece.replace('b"', "").replace("b'", "").replace("\n","").replace("\r","")
                             messagedict["subject"] = messagedict["subject"] + piece    
                         
-                        print ("End", messagedict["subject"])
+#                        print ("End", messagedict["subject"])
                     except: 
                         messagedict["subject"] = str(message["subject"])   
                     
