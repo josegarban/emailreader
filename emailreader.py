@@ -110,6 +110,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                         messagedict["from"]     = str(temp[0][0])[2:-1] + str(temp[1][0])[2:-1]
                     except: # Most messages won't need a complicated treatment
                         messagedict["from"]     = str(message["from"])    
+                    messagedict["from"] = messagedict["from"].replace('"', '')
                     
                     # Get "subject" field in e-mail
                     try: # To prevent occasional encoding errors
@@ -117,14 +118,16 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                         messagedict["subject"] = ""
 #                        print("try", len(temp), temp)
                         for tup in temp: # Some subjects may contain several tuples
+                            piece = str(tup[0])
                             
-                            if tup[1] == "utf-8": # There may be different encodings
-                                piece = str(tup[0]).encode().decode('unicode-escape').encode('latin-1').decode('utf-8')
-                            elif tup[1] == "None" or tup[1] is None:
-                                piece = str(tup[0])
+                            if tup[1] == "utf-8": # There may be different encodings in each piece
+                                piece = piece.encode().decode('unicode-escape').encode('latin-1').decode('utf-8')
+                                piece = piece[2:-1]
                                 
+                            if piece[0] == "b" and (piece[1] == "'" or piece[1] == '"'):
+                                piece = piece[2:-1]                                
 #                            print(piece)
-                            piece = piece.replace('b"', "").replace("b'", "").replace("\n","").replace("\r","")
+                            piece = piece.replace("''", "'").replace('""', '"').replace("\n","").replace("\r","")
                             messagedict["subject"] = messagedict["subject"] + piece    
                         
 #                        print ("End", messagedict["subject"])
