@@ -2,6 +2,8 @@ import pprint
 import csv
 import imaplib
 import getpass
+import urllib
+from urllib import parse
 from datetime import datetime
 from datetime import timezone
 import dateutil
@@ -185,9 +187,20 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                         print("No se pudo procesar el cuerpo del mensaje", i)
                         messagedict["body"] = "Body not read"
                         unprocessedbodies.append(i)
+                                                
                 except:
                     print("No se pudo abrir el mensaje", i)
                     unopened.append(i)
+                    
+                # Fix encoding    
+                    
+                if "=\n" in messagedict["body"] or "=\r" in messagedict["body"]:
+                    text = messagedict["body"].replace("=","%")
+                    text = messagedict["body"].replace("%\n","").replace("%\r","")
+                    text = messagedict["body"].replace("\n","").replace("\r","")
+                    text = urllib.parse.unquote_to_bytes(text)
+                    text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
+                    messagedict["body"] = text
                     
     # Report to the user the result of their request
     print("Total de mensajes procesados:", len(outputdict), "(",
