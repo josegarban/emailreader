@@ -141,7 +141,7 @@ def find_emails_in_body (input_dict):
     """
     print("\nLos correos se analizarán a continuación para encontrar los textos deseados.")
     searchfield = "body"    
-    copiedfields = ("id", "from", "from-name", "from-mail", "subject",
+    copiedfields = ("id", "from", "subject",
                     "delivered-to", "year", "month", "day", "datetime")
     output_dict = {}
     
@@ -184,8 +184,10 @@ def consolidate_emails (input_dict):
     The list is also exported as a csv file.
     """
     print("\nConsolidando correos electrónicos...")
+    temp_list = []
     output_list = []
-    field_to_match = "from"    # Field to be used as key in the output lsit
+    field_to_match = "from"    # Field to be used as key in the output list
+    additional_fields = ("year", "month")
     
     # Consolidate all e-mails found in bodies of all messages in a single set
     field_to_consolidate = "emails-in-body"
@@ -199,7 +201,7 @@ def consolidate_emails (input_dict):
     headers = []
     headers.append(field_to_consolidate)
     headers.append(field_to_match)
-    for field in fields_to_include:
+    for field in additional_fields:
         headers.append(field)
     output_list.append([headers])
     
@@ -207,11 +209,19 @@ def consolidate_emails (input_dict):
     for result in all_found_results_set:
         for source_record in input_dict:
             field_to_match_value = input_dict[source_record][field_to_match]
-
+            
             if result in input_dict[source_record][field_to_consolidate]:
-                # Prevent adding a match more than once
-                if [result, field_to_match_value] not in output_list: 
-                    output_list.append([result, field_to_match_value])
+                    row = []
+                    row.append(result)
+                    row.append(field_to_match_value)
+                    for field in additional_fields:
+                        row.append(input_dict[source_record][field])    
+                    temp_list.append(row)
+    
+    # Adding just unique results in the output list
+    for row in temp_list:
+        if row not in output_list:
+            output_list.append(row)
     
     nestedlist_to_csv(output_list, "matched_emails.csv")
     

@@ -102,7 +102,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
             if isinstance(item, tuple):
                 try:
                     message = email.message_from_string(item[1].decode("utf-8", "ignore"))
-    #                print(message) 
+#                    print(message) 
                     messagedict                 = {}
                     messagedict["id"]           = i
 
@@ -110,13 +110,8 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     try: # To prevent occasional encoding errors
                         temp                    = decode_header(message["from"])
                         messagedict["from"]     = str(temp[0][0])[2:-1] + str(temp[1][0])[2:-1]
-                        messagedict["from-name"]     = str(temp[0][0])[2:-1]
-                        messagedict["from-mail"]     = str(temp[1][0])[2:-1]
                     except: # Most messages won't need a complicated treatment
                         messagedict["from"]     = str(message["from"])    
-                    messagedict["from"] = messagedict["from"].replace('"', '')
-                    messagedict["from-name"] = messagedict["from"].replace('"', '')
-                    messagedict["from-mail"] = messagedict["from"].replace('<', '').replace('>', '')
                     
                     # Get "subject" field in e-mail
                     try: # To prevent occasional encoding errors
@@ -197,16 +192,16 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     unopened.append(i)
                     
                 # Fix encoding    
-#                try:    
-                if "=\n" in messagedict["body"] or "=\r" in messagedict["body"]:
-                    text = messagedict["body"].replace("=","%")
+                try:    
+                    if "=\n" in messagedict["body"] or "=\r" in messagedict["body"]:
+                        text = messagedict["body"].replace("=","%")
 #                        text = messagedict["body"].replace("%\n"," ").replace("%\r"," ")
-                    text = messagedict["body"].replace("\n"," ").replace("\r"," ")
-                    text = urllib.parse.unquote_to_bytes(text)
-                    text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
-                    messagedict["body"] = text
-#                except:
-#                    pass
+                        text = messagedict["body"].replace("\n"," ").replace("\r"," ")
+                        text = urllib.parse.unquote_to_bytes(text)
+                        text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
+                        messagedict["body"] = text
+                except:
+                    pass
                 
     # Report to the user the result of their request
     print("Total de mensajes procesados:", len(outputdict), "(",
@@ -258,7 +253,7 @@ def dictlist_to_csv (input_list, output_filename):
                              quotechar = '"',
                              quoting = csv.QUOTE_MINIMAL)
         
-        firstentry = input_dict[list(input_dict.keys())[1]]
+        firstentry = input_list[list(input_dict.keys())[1]]
         print ("Campos:", firstentry.keys())
         writer.writerow(firstentry.keys())
                 
