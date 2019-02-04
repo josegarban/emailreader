@@ -160,11 +160,20 @@ def find_emails_in_body (input_dict):
             )
 #        print(rawresults, "\n")
 
-        # The list is turned into a set which is then added to the dictionary
+        # The list is turned into a set
         result_set = set()        
         result_set.update(rawresults)
+
+        # Remove strings that make reference to files"
+        for result in result_set:
+            
+            if result[-4:] == ".png" or result[-4:] == ".jpg" or result[-4:] == ".gif" or result[-4:] == ".jpeg":
+#                print(result[-4:])
+                result_set = result_set - {result}
+
+        # The cleaned set is added to the dictionary
         record_dict["emails-in-body"] = result_set
-        
+
         # The inner dictionary is appended to the outer dictionary
         output_dict[record_dict["id"]] = record_dict
 

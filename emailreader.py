@@ -126,7 +126,10 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     except:
                         messagedict["from-mail"] = ""
                     try:    
-                        messagedict["from-name"] = (messagedict["from"])[:messagedict["from"].index("<")-1]
+                        if " <" not in messagedict["from"]:
+                            messagedict["from-name"] = (messagedict["from"])[:messagedict["from"].index("<")]
+                        elif "<" in messagedict["from"]:
+                            messagedict["from-name"] = (messagedict["from"])[:messagedict["from"].index("<")-1]
                     except:
                         messagedict["from-name"] = ""
                     try:    
