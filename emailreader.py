@@ -1,12 +1,11 @@
 import pprint
 import csv
 import imaplib
-import getpass
 import urllib
 from urllib import parse
 from datetime import datetime
 from datetime import timezone
-import dateutil
+urlimport dateutil
 from dateutil import parser
 import email
 from email.header import decode_header
@@ -127,11 +126,14 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     if '"' in messagedict["from"]:
                         messagedict["from"] = (messagedict["from"]).replace('"','')
                         
-                    # Add from-mail and from-name fields    
+                    # Add from-mail, from-name, and from-domain fields    
                     try:    
                         messagedict["from-mail"] = (messagedict["from"])[messagedict["from"].index("<")+1:-1]
                     except:
-                        messagedict["from-mail"] = ""
+                        if "@" in messagedict["from"]:
+                            messagedict["from-mail"] = messagedict["from"]
+                        else:
+                            messagedict["from-mail"] = ""
                     try:    
                         if " <" not in messagedict["from"]:
                             messagedict["from-name"] = (messagedict["from"])[:messagedict["from"].index("<")]
