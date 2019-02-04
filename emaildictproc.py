@@ -21,7 +21,7 @@ def nesteddict_to_csv (input_dict, output_filename):
         (2) output csv filename
     """
     print("\nCreando archivo", output_filename+"...")
-    # Open (or create) csv file
+    # Open (or create) csv filef
     with open (output_filename, "w", encoding="utf8") as csvfile:
         writer = csv.writer (csvfile,
                              delimiter = ";",
@@ -125,8 +125,8 @@ def csv_to_nesteddict(input_filename, keyfield):
     return nested_dict
 
 # Test:
-test = csv_to_nesteddict("processedmails.csv", "id")
-#pprint.pprint(test)
+part1 = csv_to_nesteddict("processedmails.csv", "id")
+#pprint.pprint(test1)
 
 
 def find_emails_in_body (input_dict):
@@ -174,8 +174,8 @@ def find_emails_in_body (input_dict):
     return output_dict
 
 # Test:
-test2 = find_emails_in_body(test)
-#pprint.pprint(test2)
+part2 = find_emails_in_body(part1)
+#pprint.pprint(part2)
 
 def consolidate_emails (input_dict):
     """
@@ -211,12 +211,12 @@ def consolidate_emails (input_dict):
             field_to_match_value = input_dict[source_record][field_to_match]
             
             if result in input_dict[source_record][field_to_consolidate]:
-                    row = []
-                    row.append(result)
-                    row.append(field_to_match_value)
-                    for field in additional_fields:
-                        row.append(input_dict[source_record][field])    
-                    temp_list.append(row)
+                row = []
+                row.append(result)
+                row.append(field_to_match_value)
+                for field in additional_fields:
+                    row.append(input_dict[source_record][field])    
+                temp_list.append(row)
     
     # Adding just unique results in the output list
     for row in temp_list:
@@ -228,6 +228,6 @@ def consolidate_emails (input_dict):
     return output_list
     
 # Test:
-test3 = consolidate_emails(test2)
-pprint.pprint(test3)
+part3 = consolidate_emails(part2)
+pprint.pprint(part3)
     

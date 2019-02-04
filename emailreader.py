@@ -109,14 +109,21 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     # Get "from" field in e-mail
                     try: # To prevent occasional encoding errors
                         temp                    = decode_header(message["from"])
-                        messagedict["from"]     = str(temp[0][0])[2:-1] + str(temp[1][0])[2:-1]
+                        from1 = str(temp[0][0]).encode('latin-1').decode('unicode-escape').encode('latin-1').decode('utf-8')
+                        from1 = from1[2:-1]
+                        from2 = str(temp[1][0]).encode('latin-1').decode('unicode-escape').encode('latin-1').decode('utf-8')
+                        from2 = from2[2:-1]
+                        messagedict["from"] = from1 + from2
+                        print("try", messagedict["from"])
                     except: # Most messages won't need a complicated treatment
-                        messagedict["from"]     = str(message["from"])    
-                    
+                        temp = str(message["from"])
+                        messagedict["from"] = (email.header.decode_header(temp)[0][0])
+                        print("except", messagedict["from"])
+                        pass
                     # Get "subject" field in e-mail
                     try: # To prevent occasional encoding errors
                         temp = decode_header(message["subject"])
-                        messagedict["subject"] = ""
+                        messagedict["subject"] = "" 
 #                        print("try", len(temp), temp)
                         for tup in temp: # Some subjects may contain several tuples
                             piece = str(tup[0])
@@ -406,6 +413,6 @@ def save_mails_to_csvfiles ():
         else:
             print("Error procesando el diccionario o lista.")
         
-test = save_mails_to_csvfiles ()
+run = save_mails_to_csvfiles ()
 
 #pprint.pprint (readmail(MYCREDENTIALS))
