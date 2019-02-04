@@ -117,7 +117,23 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     except: # Most messages won't need a complicated treatment
                         temp = str(message["from"])
                         messagedict["from"] = (email.header.decode_header(temp)[0][0])
-                        pass
+                    if '"' in messagedict["from"]:
+                        messagedict["from"] = (messagedict["from"]).replace('"','')
+                        
+                    # Add from-mail and from-name fields    
+                    try:    
+                        messagedict["from-mail"] = (messagedict["from"])[messagedict["from"].index("<")+1:-1]
+                    except:
+                        messagedict["from-mail"] = ""
+                    try:    
+                        messagedict["from-name"] = (messagedict["from"])[:messagedict["from"].index("<")-1]
+                    except:
+                        messagedict["from-name"] = ""
+                    try:    
+                        messagedict["from-domain"] = (messagedict["from-mail"])[messagedict["from-mail"].index("@")+1:]
+                    except:
+                        messagedict["from-domain"] = ""                        
+                        
                     # Get "subject" field in e-mail
                     try: # To prevent occasional encoding errors
                         temp = decode_header(message["subject"])

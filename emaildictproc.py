@@ -141,7 +141,7 @@ def find_emails_in_body (input_dict):
     """
     print("\nLos correos se analizarán a continuación para encontrar los textos deseados.")
     searchfield = "body"    
-    copiedfields = ("id", "from", "subject",
+    copiedfields = ("id", "from", "subject", "from-name", "from-mail", "from-domain",
                     "delivered-to", "year", "month", "day", "datetime")
     output_dict = {}
     
@@ -187,7 +187,7 @@ def consolidate_emails (input_dict):
     temp_list = []
     output_list = []
     field_to_match = "from"    # Field to be used as key in the output list
-    additional_fields = ("year", "month")
+    additional_fields = ("year", "month", "from-mail", "from-name", "from-domain")
     
     # Consolidate all e-mails found in bodies of all messages in a single set
     field_to_consolidate = "emails-in-body"
