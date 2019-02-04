@@ -114,11 +114,9 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                         from2 = str(temp[1][0]).encode('latin-1').decode('unicode-escape').encode('latin-1').decode('utf-8')
                         from2 = from2[2:-1]
                         messagedict["from"] = from1 + from2
-                        print("try", messagedict["from"])
                     except: # Most messages won't need a complicated treatment
                         temp = str(message["from"])
                         messagedict["from"] = (email.header.decode_header(temp)[0][0])
-                        print("except", messagedict["from"])
                         pass
                     # Get "subject" field in e-mail
                     try: # To prevent occasional encoding errors
