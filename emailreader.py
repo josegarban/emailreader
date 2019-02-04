@@ -25,8 +25,15 @@ def getcredentials():
     credentials = {}
     credentials["email"] = input ("Inserte correo electrónico:\n")
     print("Inserte contraseña: ")
-    credentials["password"] = input("") 
-    credentials["smtpserver"] = "imap.gmail.com"    
+    credentials["password"] = input("")
+    print('''Inserte servidor smtp. Si su correo es Gmail, puede dejar esto en blanco.
+        La opción predeterminada es "imap.gmail.com".
+        ''')
+    smtp = input("")
+    if smtp == "":
+        credentials["smtpserver"] = "imap.gmail.com"
+    else:
+        credentials["smtpserver"] = smtp
     return credentials
 
 ####################################################################################################
@@ -186,7 +193,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     #                            messagedict["day"], messagedict["datetime"])                    
                     except:
                         # Print an error message and send the e-mail to the second dictionary
-                        print("No se pudo procesar la fecha en el mensaje", i)
+                        print("Posible error de procesamiento en la fecha del mensaje", i)
                         print("Fecha:", messagedict["date"])
                         unprocesseddates.append((i, messagedict["date"]))
                         messagedict["year"]     = "Year not read"      # Fields that were not parsed
