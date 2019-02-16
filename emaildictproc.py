@@ -5,6 +5,7 @@ import re
 import time
 import datetime
 from datetime import datetime
+import os
 
 # Make Python ready to accept large field sizes:
 csv.field_size_limit(sys.maxsize)
@@ -15,6 +16,10 @@ Objectives:
 2. Classifying the dictionaries.
 3. Finding certain regular expressions.
 """
+
+####################################################################################################
+#################################### CSV FILE PROCESSING ###########################################
+####################################################################################################
 
 def nesteddict_to_csv (input_dict, output_filename):
     """
@@ -47,6 +52,8 @@ def nesteddict_to_csv (input_dict, output_filename):
 
     return None
 
+####################################################################################################
+
 def nestedlist_to_csv (input_list, output_filename):
     """
     Objective: open a list containing lists and write it to a csv file
@@ -67,6 +74,7 @@ def nestedlist_to_csv (input_list, output_filename):
 
     return None
 
+####################################################################################################
 
 def read_csv_fieldnames(input_filename):
     """
@@ -87,6 +95,8 @@ def read_csv_fieldnames(input_filename):
             print(fieldname)
     print("\n")
     return fieldnames
+
+####################################################################################################
 
 def csv_to_nesteddict(input_filename, keyfield):
     """
@@ -127,15 +137,15 @@ def csv_to_nesteddict(input_filename, keyfield):
                         
     return nested_dict
 
-# Test:
-part1 = csv_to_nesteddict("processedmails_timestamp.csv", "id")
-#pprint.pprint(test1)
+####################################################################################################
+####################################### TEXT PROCESSING ############################################
+####################################################################################################
 
-
-def find_emails_in_body (input_dict):
+def find_emails_in_body (input_dict, timestamp):
     """
     Inputs:
         A dictionary where a field is a string.
+        Timestamp to be added to the csv file to be generated
     Objective:
         Find regular expressions that appear to be e-mails in a dictionary.
     Outputs:
@@ -161,7 +171,7 @@ def find_emails_in_body (input_dict):
             re.findall("[0-9A-Za-z._]+@[0-9A-Za-z._]+\.[A-Za-z.]+",
                             input_dict[record][searchfield])
             )
-#        print(rawresults, "\n")
+        #print(rawresults, "\n")
 
         # The list is turned into a set
         result_set = set()        
@@ -171,7 +181,7 @@ def find_emails_in_body (input_dict):
         for result in result_set:
             
             if result[-4:] == ".png" or result[-4:] == ".jpg" or result[-4:] == ".gif" or result[-4:] == ".jpeg":
-#                print(result[-4:])
+                #print(result[-4:])
                 result_set = result_set - {result}
             if "." in result[-1]:
                 result_set = result_set - {result}
@@ -184,21 +194,22 @@ def find_emails_in_body (input_dict):
         output_dict[record_dict["id"]] = record_dict
 
     # Export findings to a csv file
-    timestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d-%H-%M-%S")
-    timestamp = "timestamp"
     nesteddict_to_csv (output_dict, "emails_permessage_"+timestamp+".csv")
         
     return output_dict
 
-# Test:
-part2 = find_emails_in_body(part1)
-#pprint.pprint(part2)
+####################################################################################################
 
-def consolidate_emails (input_dict):
+def consolidate_emails (input_dict, timestamp):
     """
-    Input: the dictionary resulting from find_emails_in_body
-    Output: a list containing unique e-mail addresses and the sources where they were found.
-    The list is also exported as a csv file.
+    Inputs:
+        The dictionary resulting from find_emails_in_body
+        Timestamp to be added to the csv file to be generated
+    Objective:
+        Consolidate e-mail addresses found across all extracted e-mails.
+    Outputs:
+        A list containing unique e-mail addresses and the sources where they were found.
+        The list is also exported as a csv file.
     """
     print("\nConsolidando correos electrónicos...")
     temp_list = []
@@ -240,13 +251,34 @@ def consolidate_emails (input_dict):
         if row not in output_list:
             output_list.append(row)
     
-    timestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d-%H-%M-%S")
-    timestamp = "timestamp"
     nestedlist_to_csv(output_list, "matched_emails_"+timestamp+".csv")
     
-    return output_list
+    return output_list    
+
+####################################################################################################
+############################################## CORE ################################################
+####################################################################################################
+
+def openfiles ():
+    """
+    Objective: open csv files to process them
+    """
+    files_to_open = []
     
-# Test:
-part3 = consolidate_emails(part2)
-pprint.pprint(part3)
-    
+    all_files = os.listdir()
+    for file in all_files:
+        if "processedmails" in file:
+            files_to_open.append(file)
+
+    for file in files_to_open:
+        
+        timestamp = file[len("processedmails"):-len(".csv")]
+        print(timestamp)
+                                                  
+        print("Abriendo", file, "...")
+        part1 = csv_to_nesteddict(file, "id")
+        part2 = find_emails_in_body(part1, timestamp)
+        part3 = consolidate_emails(part2, timestamp)
+        pprint.pprint(part3)
+
+openfiles ()

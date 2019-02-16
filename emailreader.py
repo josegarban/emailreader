@@ -111,7 +111,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
             if isinstance(item, tuple):
                 try:
                     message = email.message_from_string(item[1].decode("utf-8", "ignore"))
-#                    print(message) 
+                    #print(message) 
                     messagedict                 = {}
                     messagedict["id"]           = i
 
@@ -153,7 +153,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     try: # To prevent occasional encoding errors
                         temp = decode_header(message["subject"])
                         messagedict["subject"] = "" 
-#                        print("try", len(temp), temp)
+                        #print("try", len(temp), temp)
                         for tup in temp: # Some subjects may contain several tuples
                             piece = str(tup[0])
                             
@@ -163,11 +163,11 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                                 
                             if piece[0] == "b" and (piece[1] == "'" or piece[1] == '"'):
                                 piece = piece[2:-1]                                
-#                            print(piece)
+                            #print(piece)
                             piece = piece.replace("''", "'").replace('""', '"').replace("\n","").replace("\r","")
                             messagedict["subject"] = messagedict["subject"] + piece    
                         
-#                        print ("End", messagedict["subject"])
+                        #print ("End", messagedict["subject"])
                     except: 
                         messagedict["subject"] = str(message["subject"])   
                     
@@ -179,12 +179,12 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     # Extract year, month, day from datetime stamp on emails
                     try:
                         datetime_conv = dateutil.parser.parse(str(message["date"]))
-    #                    print(message["date"])
-    #                    print(datetime_conv)
+                        #print(message["date"])
+                        #print(datetime_conv)
                         # Convert datestamps to your local timezone
                         datetime_conv = datetime_conv.replace(tzinfo=timezone.utc).astimezone(tz=None)
-    #                    print(datetime_conv)
-    #                    print(message["date"], "→", datetime_conv) # Test the datetime conversion
+                        #print(datetime_conv)
+                        #print(message["date"], "→", datetime_conv) # Test the datetime conversion
                         messagedict["year"] = (datetime_conv.year)
                         messagedict["month"] = (datetime_conv.month)
                         messagedict["day"] = (datetime_conv.day)
@@ -194,8 +194,8 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                             datetime_conv.day,
                             datetime_conv.hour,
                             datetime_conv.minute))                
-    #                    print(messagedict["year"], messagedict["month"],
-    #                            messagedict["day"], messagedict["datetime"])                    
+                        #print(messagedict["year"], messagedict["month"],
+                                #messagedict["day"], messagedict["datetime"])                    
                     except:
                         # Print an error message and send the e-mail to the second dictionary
                         print("Posible error de procesamiento en la fecha del mensaje", i)
@@ -231,7 +231,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                 try:    
                     if "=\n" in messagedict["body"] or "=\r" in messagedict["body"]:
                         text = messagedict["body"].replace("=","%")
-#                        text = messagedict["body"].replace("%\n"," ").replace("%\r"," ")
+                        #text = messagedict["body"].replace("%\n"," ").replace("%\r"," ")
                         text = messagedict["body"].replace("\n"," ").replace("\r"," ")
                         text = urllib.parse.unquote_to_bytes(text)
                         text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
@@ -266,7 +266,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
         print(unopened)
     print("")
 
-#    print(unprocesseddates, unprocessedbodies)
+    #print(unprocesseddates, unprocessedbodies)
 
     return (outputdict, unprocesseddates, unprocessedbodies, unopened)
 
@@ -403,7 +403,6 @@ def save_mails_to_csvfiles ():
     mails       = readmail(credentials)
     
     timestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d-%H-%M-%S")
-    timestamp = "timestamp"
     
     # Pair arrays to filenames
     processedmails    = mails[0]
