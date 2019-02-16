@@ -2,6 +2,9 @@ import pprint
 import csv
 import sys
 import re
+import time
+import datetime
+from datetime import datetime
 
 # Make Python ready to accept large field sizes:
 csv.field_size_limit(sys.maxsize)
@@ -125,7 +128,7 @@ def csv_to_nesteddict(input_filename, keyfield):
     return nested_dict
 
 # Test:
-part1 = csv_to_nesteddict("processedmails.csv", "id")
+part1 = csv_to_nesteddict("processedmails_timestamp.csv", "id")
 #pprint.pprint(test1)
 
 
@@ -170,7 +173,10 @@ def find_emails_in_body (input_dict):
             if result[-4:] == ".png" or result[-4:] == ".jpg" or result[-4:] == ".gif" or result[-4:] == ".jpeg":
 #                print(result[-4:])
                 result_set = result_set - {result}
-
+            if "." in result[-1]:
+                result_set = result_set - {result}
+                result_set.add(result[:-1])
+                
         # The cleaned set is added to the dictionary
         record_dict["emails-in-body"] = result_set
 
@@ -178,7 +184,9 @@ def find_emails_in_body (input_dict):
         output_dict[record_dict["id"]] = record_dict
 
     # Export findings to a csv file
-    nesteddict_to_csv (output_dict, "emails_permessage.csv")
+    timestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d-%H-%M-%S")
+    timestamp = "timestamp"
+    nesteddict_to_csv (output_dict, "emails_permessage_"+timestamp+".csv")
         
     return output_dict
 
@@ -232,7 +240,9 @@ def consolidate_emails (input_dict):
         if row not in output_list:
             output_list.append(row)
     
-    nestedlist_to_csv(output_list, "matched_emails.csv")
+    timestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d-%H-%M-%S")
+    timestamp = "timestamp"
+    nestedlist_to_csv(output_list, "matched_emails_"+timestamp+".csv")
     
     return output_list
     
