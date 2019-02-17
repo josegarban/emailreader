@@ -104,7 +104,7 @@ def csv_to_nesteddict(input_filename, keyfield):
         The inner dictionaries match the cells in that row to the field names.
     """
     nested_dict = {}
-    
+
     # The keys in our dictionary will be the headers
     fieldnames = list(read_csv_fieldnames(input_filename))
     
@@ -112,7 +112,7 @@ def csv_to_nesteddict(input_filename, keyfield):
     templist = []
     
     # Open file and read text
-    with open(input_filename, "r") as csvfile:
+    with open(input_filename, "r", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile,
                             delimiter = ";",
                             quotechar = '"')        

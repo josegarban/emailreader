@@ -237,7 +237,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                         text = urllib.parse.unquote_to_bytes(text)
                         text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
                         
-                        messagedict["body"] = text
+                        messagedict["body"] = str(text)
                         print("Attempt", i)
                     except:
                         print("Attempt failed", i)
