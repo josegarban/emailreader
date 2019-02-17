@@ -233,24 +233,26 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                         if "=\n" in text: text = text.replace("=\n","")
                         if "=\r" in text: text = text.replace("=\r","")
                         if "\n" in text: text = text.replace("\n","")
+                        
+                        text = urllib.parse.unquote_to_bytes(text)
+                        text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
+                        
                         messagedict["body"] = text
                         print("Attempt", i)
                     except:
                         print("Attempt failed", i)
                         
+                    # Remove line breaks that might split e-mail addresses
+#                    text = messagedict["body"] 
+#                    text = urllib.parse.unquote_to_bytes(text)
+#                    text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
+#                    print("Attempt 2", i)
+#                        print("Attempt 2 failed", i)
 
                 except:
                     print("No se pudo abrir el mensaje", i)
                     unopened.append(i)
                     
-                # Remove line breaks that might split e-mail addresses
-#                try:                        
-                text = messagedict["body"] 
-                text = urllib.parse.unquote_to_bytes(text)
-                text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
-                print("Attempt 2", i)
-#                except:
-#                    print("Attempt 2 failed", i)
                         
     # Report to the user the result of their request
     print("Total de mensajes procesados:", len(outputdict), "(",

@@ -267,7 +267,7 @@ def openfiles ():
     
     all_files = os.listdir()
     for file in all_files:
-        if "processedmails" in file:
+        if "processedmails" in file and "unprocessed" not in file:
             files_to_open.append(file)
 
     for file in files_to_open:
