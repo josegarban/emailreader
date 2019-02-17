@@ -116,8 +116,13 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     unopened = []  
     
     interval = range(latest, earliest, -1)
-    print("Se procesará desde el mensaje {0}/{1} hasta el {2}/{1}, ambos inclusive.".format(
-        latest - 1, len(id_list), earliest - 1))
+
+    if  startingpoint == -1:
+        print("Se procesará desde el mensaje {0}/{1} hasta el {2}/{1}, ambos inclusive.".format(
+            latest, len(id_list), earliest))
+    else:
+        print("Se procesará desde el mensaje {0}/{1} hasta el {2}/{1}, ambos inclusive.".format(
+            latest, len(id_list), earliest))
     
     for i in interval:
         typ, data = mail.fetch(str(i), "(RFC822)" )
