@@ -12,6 +12,7 @@ from dateutil import parser
 # Instalar dateutil en pypi
 import email
 from email.header import decode_header
+import re
 
 """
 La contraseña no es la contraseña normal.
@@ -19,6 +20,9 @@ Se debe generar la contraseña en https://myaccount.google.com/security.
 La opción es "contraseñas para aplicaciones" bajo "autenticación en dos pasos"
 """
 ####################################################################################################
+############################################ MAIN FUNCTIONS ########################################
+####################################################################################################
+
 
 def getcredentials():
     """
@@ -127,7 +131,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                         temp = str(message["from"])
                         messagedict["from"] = (email.header.decode_header(temp)[0][0])
                     if '"' in messagedict["from"]:
-                        messagedict["from"] = (messagedict["from"]).replace('"','')
+                        messagedict["from"] = str(messagedict["from"]).replace('"','')
                         
                     # Add from-mail, from-name, and from-domain fields    
                     try:    
@@ -222,22 +226,22 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                         print("No se pudo procesar el cuerpo del mensaje", i)
                         messagedict["body"] = "Body not read"
                         unprocessedbodies.append(i)
+                        
+                    # Fix encoding if strings of the form "=( [0-9A-F]{1,2} )" appear
+                    try:                        
+                        expression = re.compile("=( [0-9A-F]{1,2} )", re.VERBOSE)
+                        text = expression.sub(r"%\1", messagedict["body"])
+                    
+                        messagedict["body"] = text
+                        print("Attempt", i)
+                    except:
+                        print("Attempt failed", i)
+                        
                                                 
                 except:
                     print("No se pudo abrir el mensaje", i)
                     unopened.append(i)
                     
-                # Fix encoding    
-                try:    
-                    if "=\n" in messagedict["body"] or "=\r" in messagedict["body"]:
-                        text = messagedict["body"].replace("=","%")
-                        #text = messagedict["body"].replace("%\n"," ").replace("%\r"," ")
-                        text = messagedict["body"].replace("\n"," ").replace("\r"," ")
-                        text = urllib.parse.unquote_to_bytes(text)
-                        text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
-                        messagedict["body"] = text
-                except:
-                    pass
                 
     # Report to the user the result of their request
     print("Total de mensajes procesados:", len(outputdict), "(",
@@ -272,6 +276,8 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
 
 #test = readmail(getcredentials())
 
+####################################################################################################
+######################################## CSV CREATION FUNCTIONS ####################################
 ####################################################################################################
 
 def dictlist_to_csv (input_list, output_filename):
@@ -389,11 +395,13 @@ def list_to_csv (input_list, output_filename):
 
 
 ####################################################################################################
+######################################### ACTUAL EXECUTION #########################################
+####################################################################################################
 
 def save_mails_to_csvfiles ():
     """
+    Input: none
     Objective: save the results of your inbox search to csv files
-    Input: user credentials
     Returns: none
     """
     # Get user credentials to your e-mail account
@@ -445,7 +453,6 @@ def save_mails_to_csvfiles ():
         else:
             print("Error procesando el diccionario o lista.")
         
-run = save_mails_to_csvfiles ()
+save_mails_to_csvfiles ()
 
-#pprint.pprint (readmail(MYCREDENTIALS))
 
