@@ -1,8 +1,6 @@
 import pprint
 import csv
 import imaplib
-import urllib
-from urllib import parse
 import time
 import datetime
 from datetime import datetime
@@ -13,7 +11,8 @@ from dateutil import parser
 import email
 from email.header import decode_header
 import re
-
+import urllib
+from urllib import parse
 """
 La contraseña no es la contraseña normal.
 Se debe generar la contraseña en https://myaccount.google.com/security.
@@ -230,19 +229,29 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     # Fix encoding if strings of the form "=( [0-9A-F]{1,2} )" appear
                     try:                        
                         expression = re.compile("=( [0-9A-F]{1,2} )", re.VERBOSE)
-                        text = expression.sub(r"%\1", messagedict["body"])
-                    
+                        text = expression.sub(r"%\1", messagedict["body"])                                           
+                        if "=\n" in text: text = text.replace("=\n","")
+                        if "=\r" in text: text = text.replace("=\r","")
+                        if "\n" in text: text = text.replace("\n","")
                         messagedict["body"] = text
                         print("Attempt", i)
                     except:
                         print("Attempt failed", i)
                         
-                                                
+
                 except:
                     print("No se pudo abrir el mensaje", i)
                     unopened.append(i)
                     
-                
+                # Remove line breaks that might split e-mail addresses
+#                try:                        
+                text = messagedict["body"] 
+                text = urllib.parse.unquote_to_bytes(text)
+                text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
+                print("Attempt 2", i)
+#                except:
+#                    print("Attempt 2 failed", i)
+                        
     # Report to the user the result of their request
     print("Total de mensajes procesados:", len(outputdict), "(",
           round(100 * len(outputdict)/(latest - earliest) , 1)
@@ -280,7 +289,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
 ######################################## CSV CREATION FUNCTIONS ####################################
 ####################################################################################################
 
-def dictlist_to_csv (input_list, output_filename):
+def dictlist_to_csv (input_dict, output_filename):
     """
     Objective: open a list containing dictionaries and write it to a csv file
     Inputs:
@@ -335,7 +344,7 @@ def nesteddict_to_csv (input_dict, output_filename):
 
     return None
 
-def empty_to_csv (input_iterable, output_filename):
+def empty_to_csv (input_empty, output_filename):
     """
     Objective: open an empty dictionary or list write it to a csv file
     Inputs:
