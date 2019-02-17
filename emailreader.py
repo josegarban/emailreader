@@ -242,13 +242,6 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     except:
                         print("Attempt failed", i)
                         
-                    # Remove line breaks that might split e-mail addresses
-#                    text = messagedict["body"] 
-#                    text = urllib.parse.unquote_to_bytes(text)
-#                    text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
-#                    print("Attempt 2", i)
-#                        print("Attempt 2 failed", i)
-
                 except:
                     print("No se pudo abrir el mensaje", i)
                     unopened.append(i)

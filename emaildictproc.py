@@ -2,9 +2,6 @@ import pprint
 import csv
 import sys
 import re
-import time
-import datetime
-from datetime import datetime
 import os
 
 # Make Python ready to accept large field sizes:
@@ -115,7 +112,7 @@ def csv_to_nesteddict(input_filename, keyfield):
     templist = []
     
     # Open file and read text
-    with open(input_filename, "r", encoding="utf8") as csvfile:
+    with open(input_filename, "r") as csvfile:
         reader = csv.reader(csvfile,
                             delimiter = ";",
                             quotechar = '"')        
