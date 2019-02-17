@@ -191,7 +191,7 @@ def find_emails_in_body (input_dict, timestamp):
         output_dict[record_dict["id"]] = record_dict
 
     # Export findings to a csv file
-    nesteddict_to_csv (output_dict, "emails_permessage_"+timestamp+".csv")
+    nesteddict_to_csv (output_dict, "emails_permessage"+timestamp+".csv")
         
     return output_dict
 
@@ -248,7 +248,7 @@ def consolidate_emails (input_dict, timestamp):
         if row not in output_list:
             output_list.append(row)
     
-    nestedlist_to_csv(output_list, "matched_emails_"+timestamp+".csv")
+    nestedlist_to_csv(output_list, "matched_emails"+timestamp+".csv")
     
     return output_list    
 
