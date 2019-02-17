@@ -117,7 +117,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     
     interval = range(latest, earliest, -1)
     print("Se procesará desde el mensaje {0}/{1} hasta el {2}/{1}, ambos inclusive.".format(
-        latest, len(id_list), earliest + 1))
+        latest, len(id_list), earliest))
     
     for i in interval:
         typ, data = mail.fetch(str(i), "(RFC822)" )
@@ -130,7 +130,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     message = email.message_from_string(item[1].decode("utf-8", "ignore"))
                     #print(message) 
                     messagedict                 = {}
-                    messagedict["id"]           = i + 1 # +1 added because lists start with index 0
+                    messagedict["id"]           = i 
 
                     # Get "from" field in e-mail
                     try: # To prevent occasional encoding errors
