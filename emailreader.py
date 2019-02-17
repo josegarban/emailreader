@@ -31,14 +31,11 @@ def getcredentials():
     credentials["email"] = input ("Inserte correo electrónico:\n")
     print("Inserte contraseña: ")
     credentials["password"] = input("")
-    print('''Inserte servidor smtp. Si su correo es Gmail, puede dejar esto en blanco.
-        La opción predeterminada es "imap.gmail.com".
-        ''')
+    print("Inserte servidor smtp.")
+    print('Si su correo es Gmail, puede dejar esto en blanco. La opción predeterminada es "imap.gmail.com".')
     smtp = input("")
-    if smtp == "":
-        credentials["smtpserver"] = "imap.gmail.com"
-    else:
-        credentials["smtpserver"] = smtp
+    if smtp == "": credentials["smtpserver"] = "imap.gmail.com"
+    else: credentials["smtpserver"] = smtp
     return credentials
 
 ####################################################################################################
@@ -79,22 +76,38 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
             """)
         return None
     
-    print("Se logró acceder al buzón de correo electrónico.\n")
-    print("¿Desde cuál mensaje desea leer, contando desde el más reciente?")
-    ref = input("Inserte un número o deje en blanco para leer a partir del mensaje más reciente. ")
-    if ref == "": ref = -1 # Start from latest message
-    print("¿Cuántos mensajes desea leer?")
-    diff = input("Inserte un número: ")    
-    if ref == -1: print("Se leerán los últimos", int(diff), "mensajes")
-    else: print("Se leerán", int(diff), "mensajes a partir del", str(ref)+".")
-    
+    print("Se logró acceder al buzón de correo electrónico.\nContando mensajes...")
+
     mail.select("inbox")    
     typ, data = mail.search(None, "ALL")
+    id_list  = data[0].split()
+    print("Se encontró un total de {0} mensajes en el buzón.".format(len(id_list)))
+    print("Los mensajes se etiquetarán con un número, correspondiendo el número mayor al más reciente.\n")
+
+    print("¿Desea comenzar desde el más reciente?")
+    print("Si desea leer desde el más reciente hacia atrás, responda en blanco.")
+    print("Si desea leer desde un mensaje más antiguo hacia atrás, introduzca el índice (número).")
+    startingpoint = input("")
+
+    # Start from latest message
+    if startingpoint == "": ref = -1 
+    # Start from older message
+    else: ref = len(id_list) - int(startingpoint) + 1 # +1 because lists start at 0
+
+    print("\n¿Cuántos mensajes desea leer?")
+    diff = int(input("Inserte un número: "))
     
-    id_list  = data[0].split()        
-    earliest = int(id_list[int(ref)-int(diff)]) 
-    latest   = int(id_list[int(ref)]) 
-    
+    # Start from latest message
+    if startingpoint == -1:
+        print("Se leerán {0} mensajes contando hacia atrás desde el más reciente.".format(ref))
+        latest   = len(id_list) + 1
+        earliest = len(id_list) + 1 - diff
+    # Start from older message
+    else:
+        print("Se leerán {0} mensajes.".format(diff))
+        latest   = len(id_list) - ref + 1
+        earliest = len(id_list) - ref + 1 - diff
+            
     outputdict = {}
     
     # Lists where the messages with errors in processing will be enumerated
@@ -103,7 +116,8 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     unopened = []  
     
     interval = range(latest, earliest, -1)
-    print("Se procesarán los mensajes entre el", latest-1, "y el", earliest)
+    print("Se procesará desde el mensaje {0}/{1} hasta el {2}/{1}, ambos inclusive.".format(
+        latest, len(id_list), earliest + 1))
     
     for i in interval:
         typ, data = mail.fetch(str(i), "(RFC822)" )
@@ -116,7 +130,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     message = email.message_from_string(item[1].decode("utf-8", "ignore"))
                     #print(message) 
                     messagedict                 = {}
-                    messagedict["id"]           = i
+                    messagedict["id"]           = i + 1 # +1 added because lists start with index 0
 
                     # Get "from" field in e-mail
                     try: # To prevent occasional encoding errors
@@ -238,9 +252,10 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                         text = text.decode('unicode-escape').encode('latin-1').decode('utf-8')
                         
                         messagedict["body"] = str(text)
-                        print("Attempt", i)
+                        #print("Reencoding succeeded:", i)
                     except:
-                        print("Attempt failed", i)
+                        #print("Reencoding failed:", i)
+                        pass
                         
                 except:
                     print("No se pudo abrir el mensaje", i)
@@ -284,7 +299,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
 ######################################## CSV CREATION FUNCTIONS ####################################
 ####################################################################################################
 
-def dictlist_to_csv (input_dict, output_filename):
+def dictlist_to_csv (input_list, output_filename):
     """
     Objective: open a list containing dictionaries and write it to a csv file
     Inputs:
@@ -299,7 +314,7 @@ def dictlist_to_csv (input_dict, output_filename):
                              quotechar = '"',
                              quoting = csv.QUOTE_MINIMAL)
         
-        firstentry = input_list[list(input_dict.keys())[1]]
+        firstentry = input_list[list(input_list.keys())[1]]
         print ("Campos:", firstentry.keys())
         writer.writerow(firstentry.keys())
                 
@@ -339,7 +354,7 @@ def nesteddict_to_csv (input_dict, output_filename):
 
     return None
 
-def empty_to_csv (input_empty, output_filename):
+def empty_to_csv (output_filename):
     """
     Objective: open an empty dictionary or list write it to a csv file
     Inputs:
@@ -440,7 +455,7 @@ def save_mails_to_csvfiles ():
         if tup[0] is None:
             print("No se guardó un archivo. Posible error.")
         elif len(tup[0]) == 0:
-            empty_to_csv (tup[0], tup[1])
+            empty_to_csv (tup[1])
             print("Se guardó el archivo", tup[1])
         elif isinstance (tup[0], int) or isinstance (tup[0], str):
             single_to_csv (tup[0], tup[1])
