@@ -90,9 +90,9 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     startingpoint = input("")
 
     # Start from latest message
-    if startingpoint == "": ref = -1 
+    if startingpoint == "": ref = len(id_list) 
     # Start from older message
-    else: ref = len(id_list) - int(startingpoint) + 1 # +1 because lists start at 0
+    else: ref = int(startingpoint) 
 
     print("\n¿Cuántos mensajes desea leer?")
     diff = int(input("Inserte un número: "))
@@ -100,13 +100,13 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
     # Start from latest message
     if startingpoint == -1:
         print("Se leerán {0} mensajes contando hacia atrás desde el más reciente.".format(ref))
-        latest   = len(id_list) + 1
-        earliest = len(id_list) + 1 - diff
+        latest   = len(id_list)
+        earliest = len(id_list) - diff
     # Start from older message
     else:
         print("Se leerán {0} mensajes.".format(diff))
-        latest   = len(id_list) - ref + 1
-        earliest = len(id_list) - ref + 1 - diff
+        latest   = ref
+        earliest = ref - diff
             
     outputdict = {}
     
@@ -119,10 +119,10 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
 
     if  startingpoint == -1:
         print("Se procesará desde el mensaje {0}/{1} hasta el {2}/{1}, ambos inclusive.".format(
-            latest, len(id_list), earliest))
+            latest, len(id_list), earliest+1))
     else:
         print("Se procesará desde el mensaje {0}/{1} hasta el {2}/{1}, ambos inclusive.".format(
-            latest, len(id_list), earliest))
+            latest, len(id_list), earliest+1))
     
     for i in interval:
         typ, data = mail.fetch(str(i), "(RFC822)" )
@@ -135,7 +135,7 @@ La opción es «contraseñas para aplicaciones» bajo «autenticación en dos pa
                     message = email.message_from_string(item[1].decode("utf-8", "ignore"))
                     #print(message) 
                     messagedict                 = {}
-                    messagedict["id"]           = i 
+                    messagedict["id"]           = i
 
                     # Get "from" field in e-mail
                     try: # To prevent occasional encoding errors
